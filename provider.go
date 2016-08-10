@@ -13,7 +13,7 @@ func Provider() terraform.ResourceProvider {
 		Schema: map[string]*schema.Schema{
 			"compressionlevel": &schema.Schema{
 				Type: schema.TypeString,
-				Required: true,
+				Optional: true,
 				Default: "DefaultCompression",
 				Description: "The amount of compression to use: NoCompression, BestSpeed, BestCompression or DefaultCompression",
 			},

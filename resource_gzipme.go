@@ -13,7 +13,7 @@ func resourceGzipme() *schema.Resource {
     	return &schema.Resource{
 		Create: createGzipme,
 		Read:   readGzipme,
-		Update: updateGzipme,
+		//Update: updateGzipme,
 		Delete: deleteGzipme,
 		Schema: map[string]*schema.Schema{
 			"input": &schema.Schema{
@@ -23,6 +23,7 @@ func resourceGzipme() *schema.Resource {
 			},
 			"output": &schema.Schema{
 				Type:     schema.TypeString,
+				Computed: true,
 				ForceNew: true,
 			},
 		},
