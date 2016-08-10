@@ -13,4 +13,4 @@ resource "gzip_me" "example_data" {
 
 ```
 
-Then gzip_me.output should contain your data
+Then example_data.output should contain your data, but gzipped
