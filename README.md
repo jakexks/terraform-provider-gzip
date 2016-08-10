@@ -2,6 +2,19 @@
 
 ### Usage:
 
+To install the plugin:
+
+Edit ~/.terraformrc
+```
+providers {
+    gzip = "terraform-provider-gzip"
+}
+
+
+```
+
+Then in your terraform scripts:
+
 ```
 provider "gzip" {
   compressionlevel = "BestCompression"
