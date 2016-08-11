@@ -2,17 +2,17 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	
-	"compress/gzip"
+
 	"bytes"
-	"encoding/hex"
-	"encoding/base64"
-	"io"
+	"compress/gzip"
 	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
+	"io"
 )
 
 func resourceGzipme() *schema.Resource {
-    	return &schema.Resource{
+	return &schema.Resource{
 		Create: createGzipme,
 		Read:   readGzipme,
 		//Update: updateGzipme,
@@ -33,65 +33,59 @@ func resourceGzipme() *schema.Resource {
 }
 
 func createGzipme(d *schema.ResourceData, gzipper interface{}) error {
-	data_in := d.Get("input").(string)
-	gzbuffer := bytes.Buffer{}
-	gzw := gzip.NewWriter(&gzbuffer)
-	if _, err := gzw.Write([]byte(data_in)); err != nil {
-	    return err
+	result, err := handleinput(d, gzipper.(*GZipper))
+	if err != nil {
+		return err
+	} else {
+		d.SetId(hash(result))
+		return d.Set("output", result)
 	}
-	gzw.Close()
-	
-	gzr := bytes.NewReader(gzbuffer.Bytes())
-	b64buffer := bytes.Buffer{}
-	b64w := base64.NewEncoder(base64.StdEncoding, &b64buffer)
-	if _, err := io.Copy(b64w, gzr); err != nil {
-	    return err
-	}
-	b64w.Close()
-	d.SetId(hash(string(b64buffer.Bytes())))
-	return d.Set("output", string(b64buffer.Bytes()))
 }
 
 func readGzipme(d *schema.ResourceData, gzipper interface{}) error {
-	data_in := d.Get("input").(string)
-	gzbuffer := bytes.Buffer{}
-	gzw := gzip.NewWriter(&gzbuffer)
-	if _, err := gzw.Write([]byte(data_in)); err != nil {
-	    return err
+	result, err := handleinput(d, gzipper.(*GZipper))
+	if err != nil {
+		return err
+	} else {
+		d.SetId(hash(result))
+		return d.Set("output", result)
 	}
-	gzw.Close()
-	
-	gzr := bytes.NewReader(gzbuffer.Bytes())
-	b64buffer := bytes.Buffer{}
-	b64w := base64.NewEncoder(base64.StdEncoding, &b64buffer)
-	if _, err := io.Copy(b64w, gzr); err != nil {
-	    return err
-	}
-	b64w.Close()
-	
-	d.SetId(hash(string(b64buffer.Bytes())))
-	return d.Set("output", string(b64buffer.Bytes()))
 }
 
 func updateGzipme(d *schema.ResourceData, gzipper interface{}) error {
-    data_in := d.Get("input").(string)
-	gzbuffer := bytes.Buffer{}
-	gzw := gzip.NewWriter(&gzbuffer)
-	gzw.Write([]byte(data_in))
-	gzw.Close()
-	
-	gzr := bytes.NewReader(gzbuffer.Bytes())
-	b64buffer := bytes.Buffer{}
-	b64w := base64.NewEncoder(base64.StdEncoding, &b64buffer)
-	io.Copy(b64w, gzr)
-	b64w.Close()
-	
-	d.SetId(hash(string(b64buffer.Bytes())))
-	return d.Set("output", string(b64buffer.Bytes()))
+	result, err := handleinput(d, gzipper.(*GZipper))
+	if err != nil {
+		return err
+	} else {
+		d.SetId(hash(result))
+		return d.Set("output", result)
+	}
 }
 
 func deleteGzipme(d *schema.ResourceData, gzipper interface{}) error {
 	return nil
+}
+
+func handleinput(d *schema.ResourceData, g *GZipper) (string, error) {
+	data_in := d.Get("input").(string)
+	gzbuffer := bytes.Buffer{}
+	gzw, err := gzip.NewWriterLevel(&gzbuffer, g.CompressionLevel)
+	if err != nil {
+		return "", err
+	}
+	if _, err := gzw.Write([]byte(data_in)); err != nil {
+		return "", err
+	}
+	gzw.Close()
+
+	gzr := bytes.NewReader(gzbuffer.Bytes())
+	b64buffer := bytes.Buffer{}
+	b64w := base64.NewEncoder(base64.StdEncoding, &b64buffer)
+	if _, err := io.Copy(b64w, gzr); err != nil {
+		return "", err
+	}
+	b64w.Close()
+	return string(b64buffer.Bytes()), nil
 }
 
 func hash(s string) string {
