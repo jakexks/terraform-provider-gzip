@@ -1,5 +1,7 @@
 ## Terraform GZIP resource plugin
 
+A simple plugin that gzips and base64 encodes whatever is passed to it as input. Primarily used for passing large user_data to AWS instances.
+
 ### Usage:
 
 To install the plugin:
