@@ -6,6 +6,9 @@ A simple plugin that gzips and base64 encodes whatever is passed to it as input.
 
 To install the plugin:
 
+    go get github.com/jakexks/terraform-provider-gzip
+
+
 Edit ~/.terraformrc
 ```
 providers {
