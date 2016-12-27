@@ -1,11 +1,10 @@
 package main
 
 import (
+	"compress/flate"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-
-	//"compress/gzip"
-	"compress/flate"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -18,11 +17,16 @@ func Provider() terraform.ResourceProvider {
 				Description: "The amount of compression to use: NoCompression, BestSpeed, BestCompression or DefaultCompression",
 			},
 		},
-		ResourcesMap: map[string]*schema.Resource{
-			"gzip_me": resourceGzipme(),
+		DataSourcesMap: map[string]*schema.Resource{
+			"gzip_me": dataSourceGzip(),
 		},
-		DataSourcesMap: map[string]*schema.Resource{},
-		ConfigureFunc:  configurefunc,
+		ResourcesMap: map[string]*schema.Resource{
+			"gzip_me": schema.DataSourceResourceShim(
+				"gzip_me",
+				dataSourceGzip(),
+			),
+		},
+		ConfigureFunc: configurefunc,
 	}
 }
 

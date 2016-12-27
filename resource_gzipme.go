@@ -11,12 +11,10 @@ import (
 	"io"
 )
 
-func resourceGzipme() *schema.Resource {
+func dataSourceGzip() *schema.Resource {
 	return &schema.Resource{
-		Create: createGzipme,
-		Read:   readGzipme,
-		//Update: updateGzipme,
-		Delete: deleteGzipme,
+		Read: readGzipme,
+
 		Schema: map[string]*schema.Schema{
 			"input": &schema.Schema{
 				Type:     schema.TypeString,
@@ -32,48 +30,25 @@ func resourceGzipme() *schema.Resource {
 	}
 }
 
-func createGzipme(d *schema.ResourceData, gzipper interface{}) error {
-	result, err := handleinput(d, gzipper.(*GZipper))
-	if err != nil {
-		return err
-	} else {
-		d.SetId(hash(result))
-		return d.Set("output", result)
-	}
-}
-
 func readGzipme(d *schema.ResourceData, gzipper interface{}) error {
 	result, err := handleinput(d, gzipper.(*GZipper))
 	if err != nil {
 		return err
-	} else {
-		d.SetId(hash(result))
-		return d.Set("output", result)
 	}
-}
 
-func updateGzipme(d *schema.ResourceData, gzipper interface{}) error {
-	result, err := handleinput(d, gzipper.(*GZipper))
-	if err != nil {
-		return err
-	} else {
-		d.SetId(hash(result))
-		return d.Set("output", result)
-	}
-}
-
-func deleteGzipme(d *schema.ResourceData, gzipper interface{}) error {
+	d.Set("output", result)
+	d.SetId(hash(result))
 	return nil
 }
 
-func handleinput(d *schema.ResourceData, g *GZipper) (string, error) {
-	data_in := d.Get("input").(string)
+func handleinput(d *schema.ResourceData, gzipper *GZipper) (string, error) {
+	dataIn := d.Get("input").(string)
 	gzbuffer := bytes.Buffer{}
-	gzw, err := gzip.NewWriterLevel(&gzbuffer, g.CompressionLevel)
+	gzw, err := gzip.NewWriterLevel(&gzbuffer, gzipper.CompressionLevel)
 	if err != nil {
 		return "", err
 	}
-	if _, err := gzw.Write([]byte(data_in)); err != nil {
+	if _, err := gzw.Write([]byte(dataIn)); err != nil {
 		return "", err
 	}
 	gzw.Close()
@@ -85,7 +60,7 @@ func handleinput(d *schema.ResourceData, g *GZipper) (string, error) {
 		return "", err
 	}
 	b64w.Close()
-	return string(b64buffer.Bytes()), nil
+	return b64buffer.String(), nil
 }
 
 func hash(s string) string {
